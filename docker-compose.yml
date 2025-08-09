@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  foro-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: foro_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://localhost:8080/api
+    volumes:
+      # Logs persistentes
+      - ./logs:/var/log/nginx
+    networks:
+      - foro-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  foro-network:
+    driver: bridge
+
+volumes:
+  nginx-logs:
+    driver: local
